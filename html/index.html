@@ -1,0 +1,210 @@
+<html>
+<head>
+<title>Computer Vision Project</title>
+<link href='http://fonts.googleapis.com/css?family=Nunito:300|Crimson+Text|Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" title="Default" href="styles/github.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+
+<link rel="stylesheet" href="highlighting/styles/default.css">
+<script src="highlighting/highlight.pack.js"></script>
+
+<style type="text/css">
+body {
+	margin: 0px;
+	width: 100%;
+	font-family: 'Crimson Text', serif;
+	font-size: 20px;
+	background: #fcfcfc;
+}
+h1 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 28px;
+	margin: 25px 0px 0px 0px;
+	text-transform: lowercase;
+
+}
+
+h2 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 32px;
+	margin: 15px 0px 35px 0px;
+	color: #333;
+	word-spacing: 3px;
+}
+
+h3 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 26px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+h4 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 22px;
+	margin: 10px 0px 10px 0px;
+	color: #333;
+	word-spacing: 2px;
+}
+
+h5 {
+	font-family: 'Nunito', sans-serif;
+	font-weight: normal;
+	font-size: 18px;
+	margin: 10px 0px 10px 0px;
+	color: #111;
+	word-spacing: 2px;
+}
+
+p, li {
+	color: #444;
+}
+
+a {
+	color: #DE3737;
+}
+
+.container {
+	margin: 0px auto 0px auto;
+	width: 960px;
+}
+
+#header {
+	background: #333;
+	width: 100%;
+}
+
+#headersub {
+	color: #ccc;
+	width: 960px;
+	margin: 0px auto 0px auto;
+	padding: 20px 0px 20px 0px;
+}
+
+.chart {
+	width: 480px;
+}
+.lol {
+	font-size: 16px;
+	color: #888;
+	font-style: italic;
+}
+.sep {
+	height: 1px;
+	width: 100%;
+	background: #999;
+	margin: 20px 0px 20px 0px;
+}
+.footer{
+	font-size: 16px;
+}
+.latex {
+	width: 100%;
+}
+
+.latex img {
+	display: block;
+	margin: 0px auto 0px auto;
+}
+
+pre {
+	font-family: 'Droid Sans Mono';
+	font-size: 14px;
+}
+
+td img {
+  vertical-align: middle;
+}
+
+#contents a {
+}
+</style>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+</head>
+<body>
+<div id="header" >
+<div id="headersub">
+<h1><span style="color: #DE3737">Michael Groff</span></h1>
+</div>
+</div>
+<div class="container">
+
+<h2>Project 2: Local Feature Matching</h2>
+
+
+
+<div style="float: right; padding: 20px">
+<img src="vis_lines2.jpg" width="75%"/>
+<p style="font-size: 14px">Notre Dame Cathedral</p>
+</div>
+
+<div style="clear:both">
+<h3>Harris Corners</h3>
+
+<p> Local Feature matching is an important part of Computer vision as the ability of a computer to correctly match features of images is vital in training the computer to process images and categorize not only the images but the objects in the images with defining characteristics. For this project we first searched for points that had a very high chance of being corners, this was done by using the image derivatives X and Y to create and then calculate the determinant and trace of a moment matrix consisting of 4 blocks of XX, XY, YY. Each pixel was then scored using these numbers and the formula: det-0.06*(trac**2). We then looped through each pixel only considering those above the threshold of 1000 and checked to see if they were not only a local maximum but also if they were at least 10% greater than the scores of each neighboring pixel. Interestingly enough the use of a gaussian blur over the initial image had very little effect on the amount and location of corners identified. However, there was a small increase in accuracy of the overall program by using a Gaussian blur with low standard deviation on each of the blocks in the moment matrix. In some images the number of corners found was extremely large which led to an increase in runtime for the later functions, to mitigate this we only saved the 10,000 highest scored locations (scoring was based on a ratio of the local maximum to its largest neighbor).
+</p>
+
+
+
+<div style="clear:both">
+<h3>SIFT</h3>
+
+<p> Once the key points were identified the next step was to create a feature based on a patch of our image surrounding each of our corner points. This was achieved using an algorithm very similar to a standard SIFT. The patch was normalized, broken into 16 smaller patches, each pixel had its gradient calculated then binned by weight into 8 possible gradients for each patch. By doing so we created a 128-point vector that we then normalized and used as out feature. Using this SIFT feature allowed our feature matcher to achieve 87% correctness for the Notre Dame image and 51% for the Mount Rushmore Image. Also, a scaling factor was written for the SIFT in order to attempt to adjust the feature size for images of varying lengths however it failed to identify scaled features satisfactorily.
+</p>
+
+<div style="clear:both">
+<h3>Feature matching</h3>
+
+<p>Once features were collected from each image each feature from the first image was compared against every feature in the second. These features were then scored by taking the 2-norm of the difference between their identifying feature vectors, we then took the lowest scored distance and compared it with its neighbor (nndr) to see if it was in fact the best match (nndr < 1). To eliminate features that were similar but located in vastly different regions of the image we used a suppression radius calculated by taking the geometric means of the dimensions of the smallest subsection of each image that contained all of its corner points. The use of this suppression radius brought accuracy to 95% for the Notre Dame Image and 78% for Mount Rushmore.
+</p>
+
+</code></pre>
+
+
+<ol>
+<li>NotreDame 95%</li>
+<li>MountRushmore 78%</li>
+<li>Episcopal Gaudi 0%</li>
+</ol>
+
+<table border=1>
+<tr>
+<td>
+<img src="dots21.jpg" width="24%"/>
+<img src="dots22.jpg"  width="24%"/>
+<img src="vis_circles2.jpg" width="24%"/>
+<img src="eval2.jpg" width="24%"/>
+</td>
+</tr>
+
+<tr>
+<td>
+<img src="dots31.jpg" width="24%"/>
+<img src="dots32.jpg"  width="24%"/>
+<img src="vis_circles3.jpg" width="24%"/>
+<img src="eval3.jpg" width="24%"/>
+</td>
+</tr>
+
+<tr>
+<td>
+	<img src="dots41.jpg" width="24%"/>
+	<img src="dots42.jpg"  width="24%"/>
+	<img src="vis_circles4.jpg" width="24%"/>
+	<img src="eval4.jpg" width="24%"/>
+</td>
+</tr>
+
+</table>
+
+<div style="clear:both" >
+<p> 	</p>
+</div>
+</body>
+</html>
